@@ -3,7 +3,8 @@ collsize
 
 Regular MongoDB CLI commands to get data on collections are dull:
 
-```rs0:PRIMARY> db 
+```
+rs0:PRIMARY> db 
 testX
 rs0:PRIMARY> show collections
 Xfoo
