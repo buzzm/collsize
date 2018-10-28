@@ -259,21 +259,24 @@ db.getCollectionNames().forEach(function(n) {
 if(sortcol == undefined) {
     sortcol = "count";
 }
+
+sortdir = 1;   
 sortcol = sortcol.toLowerCase();
+if(sortcol.indexOf("-") == 0) {  // leading -; invert sort
+    sortdir = -1;   
+    sortcol = sortcol.substring(1,sortcol.length);
+}
 
 var hdrmap = {
-    "collection":{"name":"collname", "dir":1},
-    "count":{"name":"count", "dir":-1},
-    "avgsize":{"name":"objsize", "dir":-1},
-    "unz":{"name":"csize", "dir":-1},
-q    "totidx":{"name":"totidx", "dir":-1}
+    "collection":"collname",
+    "count":"count",
+    "avgsize":"objsize",
+    "unz":"csize",
+    "totidx":"totidx"
 };
 
 t.sort(function(a,b){
-    var dd = hdrmap[sortcol];
-
-    var scol = dd["name"];
-    var dir = dd["dir"];
+    var scol = hdrmap[sortcol];
       
     if(a[scol] < b[scol]) {
         n = -1;
@@ -283,7 +286,7 @@ t.sort(function(a,b){
         n = 0;
     }
 
-    n = n * dir;
+    n = n * sortdir;
 
     return n;
     });

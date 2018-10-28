@@ -45,25 +45,34 @@ name: test; count: 4
 name: ticks; count: 86400
 ```
 
-But what you really want is something like this:
+But what you really want is something like this.  Nicely formatted
+data with totals, averages, etc.:
 ```
 rs0:PRIMARY> db.collsize();
 Collection            Count   AvgSize          Unz  Xz  +Idx     TotIdx  Idx/doc
 --------------------  ------- -------- -G--M------  --- ---- ---M------  -------
-             account  1000000      72     72758890  3.2    1   20770816   20
-               ticks    86400      61      5270400  3.2    3    2957312   33
-                 foo        9      27          246  0.0    0      16384    0
-                corn        4      29          116  0.0    0      16384    0
-                test        4      19           76  0.0    0      16384    0
-                 geo        3     484         1453  0.0    1      32768    0
+                Xfoo        0      -1            0  0.0    1    2236416  NaN
               myColl        1      76           76  0.0    0      16384    0
                  qqq        1      33           33  0.0    0      16384    0
+                 geo        3     484         1453  0.0    1      32768    0
+                corn        4      29          116  0.0    0      16384    0
+                test        4      19           76  0.0    0      16384    0
+                 foo        9      27          246  0.0    0      16384    0
+               ticks    86400      61      5270400  3.2    3    2957312   33
+             account  1000000      72     72758890  3.2    1   20770816   20
                -----  ------- -------- -G--M------  --- ---- ---M------  -------
                    9  1086422             78031290             26079232
 ```
 
 `collsize` extends the MongoDB CLI DB object prototype with a new method
-`collsize` and formats it nicely.  By default, it is sorted by `count`.
+`collsize` and formats it nicely.  `Unz` is the UNcompressed size of the data
+i.e. as it would appear as a set of BSON objects in memory.  `Xz` is the 
+compression factor, so for example an UNz of 60MB with an `Xz` of 3 would
+(roughly) have an actual storage allocation of only 20MB.  `+Idx` is the
+number of additional indexes *beyond* the mandatory index on `_id`. 
+`TotIdx` is the on-disk size of *all* the indexes.
+
+By default, it is sorted by `count`.
 You can change sort by supplying the name of the column header in any
 case combination:
 
@@ -71,16 +80,45 @@ case combination:
 rs0:PRIMARY> db.collsize("uNz"); // mixed case does not matter
 Collection            Count   AvgSize          Unz  Xz  +Idx     TotIdx  Idx/doc
 --------------------  ------- -------- -G--M------  --- ---- ---M------  -------
-             account  1000000      72     72758890  3.2    1   20770816   20
-               ticks    86400      61      5270400  3.2    3    2957312   33
-                 geo        3     484         1453  0.0    1      32768    0
-                 foo        9      27          246  0.0    0      16384    0
-                corn        4      29          116  0.0    0      16384    0
+                Xfoo        0      -1            0  0.0    1    2236416  NaN
+                 qqq        1      33           33  0.0    0      16384    0
               myColl        1      76           76  0.0    0      16384    0
                 test        4      19           76  0.0    0      16384    0
-                 qqq        1      33           33  0.0    0      16384    0
-               -----  ------- -------- -G--M------  --- ---- ---M------  -------
-                   9  1086422             78031290             26079232
+                corn        4      29          116  0.0    0      16384    0
+(etc)
+```
+
+Placing a dash `-` in front of the sort column name inverts the sort:
+```
+rs0:PRIMARY> db.collsize("-count")
+Collection            Count   AvgSize          Unz  Xz  +Idx     TotIdx  Idx/doc
+--------------------  ------- -------- -G--M------  --- ---- ---M------  -------
+             account  1000000      72     72758890  3.2    1   20770816   20
+               ticks    86400      61      5270400  3.2    3    2957312   33
+                 foo        9      27          246  0.0    0      16384    0
+                corn        4      29          116  0.0    0      16384    0
+                test        4      19           76  0.0    0      16384    0
+(etc)
+```
+
+
+Use
+-------
+Easy!   Just load `collsize.js` from the prompt:
+
+```
+$ mongo
+MongoDB shell version v4.0.0
+connecting to: mongodb://127.0.0.1:37017/testX
+MongoDB server version: 4.0.0
+rs0:PRIMARY> load("collsize.js");
+true
+rs0:PRIMARY> db.collsize()
+Collection            Count   AvgSize          Unz  Xz  +Idx     TotIdx  Idx/doc
+--------------------  ------- -------- -G--M------  --- ---- ---M------  -------
+                Xfoo        0      -1            0  0.0    1    2236416  NaN
+              myColl        1      76           76  0.0    0      16384    0
+(etc)
 ```
 
 
