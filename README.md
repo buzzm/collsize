@@ -64,7 +64,8 @@ Collection            Count   AvgSize          Unz  Xz  +Idx     TotIdx  Idx/doc
                    9  1086422             78031290             26079232
 ```
 
-`collsize` extends the MongoDB CLI DB object prototype with a new method
+`collsize` extends the MongoDB CLI DB object prototype (db.__proto__)
+with a new method
 `collsize` and formats it nicely.  `Unz` is the UNcompressed size of the data
 i.e. as it would appear as a set of BSON objects in memory.  `Xz` is the 
 compression factor, so for example an UNz of 60MB with an `Xz` of 3 would

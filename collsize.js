@@ -217,8 +217,11 @@ This software is not supported by MongoDB, Inc. under any of their commercial su
     }
 })(typeof window === "undefined" ? this : window);
 
+// mongosh no longer uses capitalized whatever-this-is.
+//DB.prototype.collsize = function (sortcol) {
 
-DB.prototype.collsize = function (sortcol) {
+//  WORKS!
+db.__proto__.collsize = function (sortcol) {
 
 var t = [];
 
@@ -233,7 +236,11 @@ db.getCollectionNames().forEach(function(n) {
 	// var o = db[n].findOne();
 	// var x = Object.bsonsize(o);
 	// var tt = x * c;
-	var c = stats.count;
+    var c = stats.count;
+    if(undefined == c) {
+	c = coll.count();
+	print("manual count: " + c);
+    }
 	var x = stats.avgObjSize;
 	var tt = stats.size;
 
@@ -317,8 +324,13 @@ t.forEach(function(r) {
 		} 
 	    });
 
+    var cn = r.collname;
+    if(cn.length > 20) {
+	cn = cn.slice(0,19) + '+';
+    }
+	
 	print(XXsprintf("%20s %8d   %5d %12d  %3.1f   %2d %10d  %3d",
-		      r.collname,
+			cn,
 		      r.count,
 		      r.objsize,
 		      r.csize,
