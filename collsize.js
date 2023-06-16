@@ -225,10 +225,12 @@ db.__proto__.collsize = function (sortcol) {
 
 var t = [];
 
-db.getCollectionNames().forEach(function(n) {
-	//var stats = db[n].stats();
+db.getCollectionInfos().forEach(function(info) {
+    //var stats = db[n].stats();
 
-	// db[n] does not work with collections named with leading underscores!
+    if(info['type'] == 'collection') {
+
+	var n = info['name'];
 	var coll = db.getCollection(n);
 	var stats = coll.stats();
 
@@ -236,11 +238,11 @@ db.getCollectionNames().forEach(function(n) {
 	// var o = db[n].findOne();
 	// var x = Object.bsonsize(o);
 	// var tt = x * c;
-    var c = stats.count;
-    if(undefined == c) {
-	c = coll.count();
-	print("manual count: " + c);
-    }
+	var c = stats.count;
+	if(undefined == c) {
+	    c = coll.count();
+	    print("manual count: " + c);
+	}
 	var x = stats.avgObjSize;
 	var tt = stats.size;
 
@@ -260,7 +262,9 @@ db.getCollectionNames().forEach(function(n) {
 	var ixpd = (stats.totalIndexSize - (16384 * stats.nindexes)) / stats.count
 
 	t.push({collname:n, count:c, objsize:x, csize:tt, comp:comp, totidx:stats.totalIndexSize, nidx:nidx, ixpd:ixpd});
-    });
+    }
+    
+});
 
 
 if(sortcol == undefined) {
